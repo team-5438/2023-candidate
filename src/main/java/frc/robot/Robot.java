@@ -4,13 +4,18 @@
 
 package frc.robot;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+
+import java.util.IdentityHashMap;
+
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
+import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -37,6 +42,8 @@ public class Robot extends TimedRobot {
   private CANSparkMax left_front_drive = new CANSparkMax(2, MotorType.kBrushless);
   private CANSparkMax right_back_drive = new CANSparkMax(3, MotorType.kBrushless);
   private CANSparkMax right_front_drive = new CANSparkMax(4, MotorType.kBrushless);
+  DifferentialDrive m_robotDrive = new DifferentialDrive(left_front_drive, left_back_drive);
+  
 
   //create a Joystick object
   private Joystick controller = new Joystick(0);
@@ -116,12 +123,13 @@ public class Robot extends TimedRobot {
   public void teleopPeriodic() {
     //percent output: ranges from -1 to 1
       double leftJoystickPercent = -controller.getRawAxis(1);
-      double rightJoystickPercent = -controller.getRawAxis(5);
-      left_front_drive.set(leftJoystickPercent);
-      right_front_drive.set(rightJoystickPercent);
-
+      double rightJoystickPercent = -controller.getRawAxis(4);
+      //left_front_drive.set(MathUtil.applyDeadband(leftJoystickPercent, .05));
+      //right_front_drive.set(rightJoystickPercent);
+      m_robotDrive.arcadeDrive(leftJoystickPercent, rightJoystickPercent);
       SmartDashboard.putNumber("Left Motor Percent Output", leftJoystickPercent);
       SmartDashboard.putNumber("Right Motor Percent Output", rightJoystickPercent);
+
   }
 
   @Override
