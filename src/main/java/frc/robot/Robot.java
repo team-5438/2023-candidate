@@ -42,11 +42,17 @@ public class Robot extends TimedRobot {
   private CANSparkMax left_front_drive = new CANSparkMax(2, MotorType.kBrushless);
   private CANSparkMax right_back_drive = new CANSparkMax(3, MotorType.kBrushless);
   private CANSparkMax right_front_drive = new CANSparkMax(4, MotorType.kBrushless);
+  private CANSparkMax wrist = new CANSparkMax(0, MotorType.kBrushless);
+  private CANSparkMax leftIntake = new CANSparkMax(0, MotorType.kBrushless);
+  private CANSparkMax rightIntake = new CANSparkMax(0, MotorType.kBrushless);
+  private CANSparkMax pivot = new CANSparkMax(0, MotorType.kBrushless);
+  private CANSparkMax extender = new CANSparkMax(0, MotorType.kBrushless);
   DifferentialDrive m_robotDrive = new DifferentialDrive(left_front_drive, left_back_drive);
   
 
   //create a Joystick object
-  private Joystick controller = new Joystick(0);
+  private Joystick driver = new Joystick(0);
+  private Joystick operator = new Joystick(1);
 
   //create intake motor
 
@@ -63,10 +69,12 @@ public class Robot extends TimedRobot {
     //invert the "right" side of the drivetrain
     right_back_drive.setInverted(true);
     right_front_drive.setInverted(true);
+    rightIntake.setInverted(true);
 
     //follow the "leaders" of the right and the left side to minimize the amount of code we need to write
     left_back_drive.follow(left_front_drive);
     right_back_drive.follow(right_front_drive);
+    rightIntake.follow(leftIntake);
   }
 
   /**
@@ -122,13 +130,32 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
     //percent output: ranges from -1 to 1
-      double leftJoystickPercent = -controller.getRawAxis(1);
-      double rightJoystickPercent = -controller.getRawAxis(4);
+      double leftJoystickPercent = -driver.getRawAxis(1);
+      double rightJoystickPercent = -driver.getRawAxis(4);
+      double rightTriggerPercent = -operator.getRawAxis(3);
+      double leftTriggerPercent = -operator.getRawAxis(6);
+      double operatorLeftJoystickPercent = -operator.getRawAxis(1);
+      double operatorRightJoystickPercent = -operator.getRawAxis(4);
+
       //left_front_drive.set(MathUtil.applyDeadband(leftJoystickPercent, .05));
       //right_front_drive.set(rightJoystickPercent);
       m_robotDrive.arcadeDrive(leftJoystickPercent, rightJoystickPercent);
-      SmartDashboard.putNumber("Left Motor Percent Output", leftJoystickPercent);
-      SmartDashboard.putNumber("Right Motor Percent Output", rightJoystickPercent);
+      extender.set(MathUtil.applyDeadband(rightTriggerPercent, 0.05));
+      extender.set(MathUtil.applyDeadband(leftTriggerPercent, 0.05));
+      wrist.set(MathUtil.applyDeadband(operatorLeftJoystickPercent, 0.05));
+      pivot.set(MathUtil.applyDeadband(operatorRightJoystickPercent, 0.05));
+      while (operator.getRawButton(5)){
+        leftIntake.set(.5);
+      }
+      while (operator.getRawButton(4)){
+        leftIntake.set(-.5);
+      }
+      while (driver.getRawButton(5)) {
+        m_robotDrive.arcadeDrive(leftJoystickPercent, rightJoystickPercent);
+      }
+      while (driver.getRawButton(4)){
+        m_robotDrive.arcadeDrive(leftJoystickPercent, rightJoystickPercent);
+      }
 
   }
 
