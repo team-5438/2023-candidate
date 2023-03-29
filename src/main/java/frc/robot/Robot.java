@@ -42,12 +42,12 @@ public class Robot extends TimedRobot {
   private CANSparkMax left_front_drive = new CANSparkMax(2, MotorType.kBrushless);
   private CANSparkMax right_back_drive = new CANSparkMax(3, MotorType.kBrushless);
   private CANSparkMax right_front_drive = new CANSparkMax(4, MotorType.kBrushless);
-  private CANSparkMax wrist = new CANSparkMax(0, MotorType.kBrushless);
-  private CANSparkMax leftIntake = new CANSparkMax(0, MotorType.kBrushless);
-  private CANSparkMax rightIntake = new CANSparkMax(0, MotorType.kBrushless);
-  private CANSparkMax pivot = new CANSparkMax(0, MotorType.kBrushless);
-  private CANSparkMax extender = new CANSparkMax(0, MotorType.kBrushless);
-  DifferentialDrive m_robotDrive = new DifferentialDrive(left_front_drive, left_back_drive);
+  private CANSparkMax wrist = new CANSparkMax(9, MotorType.kBrushless);
+  private CANSparkMax leftIntake = new CANSparkMax(7, MotorType.kBrushless);
+  private CANSparkMax rightIntake = new CANSparkMax(8, MotorType.kBrushless);
+  private CANSparkMax pivot = new CANSparkMax(5, MotorType.kBrushless);
+  private CANSparkMax extender = new CANSparkMax(6, MotorType.kBrushless);
+  DifferentialDrive m_robotDrive = new DifferentialDrive(left_front_drive, right_front_drive);
   
 
   //create a Joystick object
@@ -74,7 +74,6 @@ public class Robot extends TimedRobot {
     //follow the "leaders" of the right and the left side to minimize the amount of code we need to write
     left_back_drive.follow(left_front_drive);
     right_back_drive.follow(right_front_drive);
-    rightIntake.follow(leftIntake);
   }
 
   /**
@@ -132,30 +131,32 @@ public class Robot extends TimedRobot {
     //percent output: ranges from -1 to 1
       double leftJoystickPercent = -driver.getRawAxis(1);
       double rightJoystickPercent = -driver.getRawAxis(4);
-      double rightTriggerPercent = -operator.getRawAxis(3);
-      double leftTriggerPercent = -operator.getRawAxis(6);
-      double operatorLeftJoystickPercent = -operator.getRawAxis(1);
-      double operatorRightJoystickPercent = -operator.getRawAxis(4);
-
+      double rightTriggerPercent = -operator.getRawAxis(4);
+      double leftTriggerPercent = -operator.getRawAxis(3);
+      double operatorLeftJoystickPercent = operator.getRawAxis(1);
+      double operatorRightJoystickPercent = operator.getRawAxis(5);
+      double intakeButton = 0;
+      double extenderChange = rightTriggerPercent - leftTriggerPercent;
+      if (operator.getRawButton(5)){
+        intakeButton = .25;
+      }
+      else if (operator.getRawButton(6)){
+        intakeButton = -.1;
+      }
       //left_front_drive.set(MathUtil.applyDeadband(leftJoystickPercent, .05));
       //right_front_drive.set(rightJoystickPercent);
       m_robotDrive.arcadeDrive(leftJoystickPercent, rightJoystickPercent);
-      extender.set(MathUtil.applyDeadband(rightTriggerPercent, 0.05));
-      extender.set(MathUtil.applyDeadband(leftTriggerPercent, 0.05));
-      wrist.set(MathUtil.applyDeadband(operatorLeftJoystickPercent, 0.05));
-      pivot.set(MathUtil.applyDeadband(operatorRightJoystickPercent, 0.05));
-      while (operator.getRawButton(5)){
-        leftIntake.set(.5);
-      }
-      while (operator.getRawButton(4)){
-        leftIntake.set(-.5);
-      }
-      while (driver.getRawButton(5)) {
-        m_robotDrive.arcadeDrive(leftJoystickPercent, rightJoystickPercent);
-      }
-      while (driver.getRawButton(4)){
-        m_robotDrive.arcadeDrive(leftJoystickPercent, rightJoystickPercent);
-      }
+      extender.set(MathUtil.applyDeadband(.25*extenderChange, 0.1));
+      wrist.set(MathUtil.applyDeadband(operatorRightJoystickPercent, 0.05));
+      pivot.set(MathUtil.applyDeadband(operatorLeftJoystickPercent, 0.05));
+      leftIntake.set(intakeButton);
+      rightIntake.set(intakeButton);
+      // while (driver.getRawButton(5)) {
+      //   m_robotDrive.arcadeDrive(leftJoystickPercent, rightJoystickPercent);
+      // }
+      // while (driver.getRawButton(4)){
+      //   m_robotDrive.arcadeDrive(leftJoystickPercent, rightJoystickPercent);
+      // }
 
   }
 
@@ -164,7 +165,6 @@ public class Robot extends TimedRobot {
     // Cancels all running commands at the start of test mode.
     CommandScheduler.getInstance().cancelAll();
   }
-
   /** This function is called periodically during test mode. */
   @Override
   public void testPeriodic() {}
