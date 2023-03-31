@@ -23,7 +23,7 @@ public class Robot extends TimedRobot {
 
   public ArmSubsystem armSubsystem;
   public ControllerSubsystem controllerSubsystem;
-  public DrivetrainSubsystem drivetrainSubsystem;
+ // public DrivetrainSubsystem drivetrainSubsystem;
   public ClawCommand inOutTake;
   public ArmExtendCommand armExtendCommand;
   DifferentialDrive m_robotDrive;
@@ -49,9 +49,11 @@ public class Robot extends TimedRobot {
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
     handSubsystem = new HandSubsystem();
-    drivetrainSubsystem = new DrivetrainSubsystem();
+
     armSubsystem = new ArmSubsystem();
-    m_robotDrive = new DifferentialDrive(drivetrainSubsystem.left_front_drive, drivetrainSubsystem.right_front_drive);
+
+    m_robotContainer = new RobotContainer();
+    
   }
 
   /**
@@ -66,12 +68,12 @@ public class Robot extends TimedRobot {
     // Runs the Scheduler.  This is responsible for polling buttons, adding newly-scheduled
     // commands, running already-scheduled commands, removing finished or interrupted commands,
     // and running subsystem periodic() methods.  This must be called from the robot's periodic
-    // block in order for anything in the Command-based framework to work.
+    //block in order for anything in the Command-based framework to work.
     controllerSubsystem = new ControllerSubsystem();
     armExtendCommand = new ArmExtendCommand(armSubsystem);
     inOutTake = new ClawCommand(handSubsystem);
     CommandScheduler.getInstance().run();
-    m_robotDrive.arcadeDrive(controllerSubsystem.leftJoystickPercent, controllerSubsystem.rightJoystickPercent);
+    
     ArmSubsystem.pivotfeedforward.calculate(20, 30, 40);
     ArmSubsystem.extenderfeedforward.calculate(20, 30);
   }
@@ -113,6 +115,9 @@ public class Robot extends TimedRobot {
   @Override
   public void teleopPeriodic() {
 
+    m_robotContainer.drive.getDefaultCommand().execute();
+
+    CommandScheduler.getInstance().run();
   }
 
   @Override
