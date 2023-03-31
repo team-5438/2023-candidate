@@ -12,9 +12,8 @@ public class ClawCommand {
         handSubsystem.leftIntake.set(controllerSubsystem.leftWheel);
         handSubsystem.rightIntake.set(controllerSubsystem.rightWheel);
         handSubsystem.rightIntake.setInverted(true);
-
         handSubsystem.RoboComp.enableCompressorAnalog(80, 110);
         
-        handSubsystem.wrist.set(MathUtil.applyDeadband(controllerSubsystem.operatorRightJoystickPercent, 0.05));
+        HandSubsystem.wrist.set(MathUtil.applyDeadband(controllerSubsystem.operatorRightJoystickPercent, 0.05));
     }
 }

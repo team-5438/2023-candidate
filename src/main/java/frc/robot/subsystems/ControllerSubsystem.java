@@ -28,12 +28,12 @@ public class ControllerSubsystem {
 
         // intake / outtake claw
         if (operator.getRawButton(6)) {  // outake
-            leftWheel = -.75;
-            rightWheel = -.75;
+            leftWheel = -.5;
+            rightWheel = -.5;
         }
         if (operator.getRawButton(5)) { // intake
-            leftWheel = .75;
-            rightWheel = .75;
+            leftWheel = .5;
+            rightWheel = .5;
         }
         
         // adjusting drivetrain speeds
@@ -50,6 +50,6 @@ public class ControllerSubsystem {
 
         if (operator.getRawButtonPressed(14)) {
             HandSubsystem.solenoidToggle();
-        }
+        }      
     }
 }
