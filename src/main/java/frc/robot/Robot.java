@@ -4,18 +4,13 @@
 
 package frc.robot;
 
-import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.wpilibj.Joystick;
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-
-import java.util.IdentityHashMap;
-
-import com.revrobotics.CANSparkMax;
-import com.revrobotics.CANSparkMaxLowLevel.MotorType;
-import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import frc.robot.commands.ArmExtendCommand;
+import frc.robot.commands.ClawCommand;
+import frc.robot.subsystems.*;
 
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
@@ -26,8 +21,15 @@ import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
 
-  private RobotContainer m_robotContainer;
+  public ArmSubsystem armSubsystem;
+  public ControllerSubsystem controllerSubsystem;
+  public DrivetrainSubsystem drivetrainSubsystem;
+  public ClawCommand inOutTake;
+  public ArmExtendCommand armExtendCommand;
+  DifferentialDrive m_robotDrive;
+  public HandSubsystem handSubsystem;
 
+  private RobotContainer m_robotContainer;
 
   /*
   write code to create the following motors:
@@ -38,24 +40,6 @@ public class Robot extends TimedRobot {
   - rightMotor3 (5)
   */
 
-  private CANSparkMax left_back_drive = new CANSparkMax(1, MotorType.kBrushless);
-  private CANSparkMax left_front_drive = new CANSparkMax(2, MotorType.kBrushless);
-  private CANSparkMax right_back_drive = new CANSparkMax(3, MotorType.kBrushless);
-  private CANSparkMax right_front_drive = new CANSparkMax(4, MotorType.kBrushless);
-  private CANSparkMax wrist = new CANSparkMax(9, MotorType.kBrushless);
-  private CANSparkMax leftIntake = new CANSparkMax(7, MotorType.kBrushless);
-  private CANSparkMax rightIntake = new CANSparkMax(8, MotorType.kBrushless);
-  private CANSparkMax pivot = new CANSparkMax(5, MotorType.kBrushless);
-  private CANSparkMax extender = new CANSparkMax(6, MotorType.kBrushless);
-  DifferentialDrive m_robotDrive = new DifferentialDrive(left_front_drive, right_front_drive);
-  
-
-  //create a Joystick object
-  private Joystick driver = new Joystick(0);
-  private Joystick operator = new Joystick(1);
-
-  //create intake motor
-
   /**
    * This function is run when the robot is first started up and should be used for any
    * initialization code.
@@ -64,16 +48,10 @@ public class Robot extends TimedRobot {
   public void robotInit() {
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
-    m_robotContainer = new RobotContainer();
-
-    //invert the "right" side of the drivetrain
-    right_back_drive.setInverted(true);
-    right_front_drive.setInverted(true);
-    rightIntake.setInverted(true);
-
-    //follow the "leaders" of the right and the left side to minimize the amount of code we need to write
-    left_back_drive.follow(left_front_drive);
-    right_back_drive.follow(right_front_drive);
+    handSubsystem = new HandSubsystem();
+    drivetrainSubsystem = new DrivetrainSubsystem();
+    armSubsystem = new ArmSubsystem();
+    m_robotDrive = new DifferentialDrive(drivetrainSubsystem.left_front_drive, drivetrainSubsystem.right_front_drive);
   }
 
   /**
@@ -89,7 +67,11 @@ public class Robot extends TimedRobot {
     // commands, running already-scheduled commands, removing finished or interrupted commands,
     // and running subsystem periodic() methods.  This must be called from the robot's periodic
     // block in order for anything in the Command-based framework to work.
+    controllerSubsystem = new ControllerSubsystem();
+    armExtendCommand = new ArmExtendCommand(armSubsystem);
+    inOutTake = new ClawCommand(handSubsystem);
     CommandScheduler.getInstance().run();
+    m_robotDrive.arcadeDrive(controllerSubsystem.leftJoystickPercent, controllerSubsystem.rightJoystickPercent);
   }
 
   /** This function is called once each time the robot enters Disabled mode. */
@@ -128,35 +110,6 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
-    //percent output: ranges from -1 to 1
-      double leftJoystickPercent = -driver.getRawAxis(1);
-      double rightJoystickPercent = -driver.getRawAxis(4);
-      double rightTriggerPercent = -operator.getRawAxis(4);
-      double leftTriggerPercent = -operator.getRawAxis(3);
-      double operatorLeftJoystickPercent = operator.getRawAxis(1);
-      double operatorRightJoystickPercent = operator.getRawAxis(5);
-      double intakeButton = 0;
-      double extenderChange = rightTriggerPercent - leftTriggerPercent;
-      if (operator.getRawButton(5)){
-        intakeButton = .25;
-      }
-      else if (operator.getRawButton(6)){
-        intakeButton = -.1;
-      }
-      //left_front_drive.set(MathUtil.applyDeadband(leftJoystickPercent, .05));
-      //right_front_drive.set(rightJoystickPercent);
-      m_robotDrive.arcadeDrive(leftJoystickPercent, rightJoystickPercent);
-      extender.set(MathUtil.applyDeadband(.25*extenderChange, 0.1));
-      wrist.set(MathUtil.applyDeadband(operatorRightJoystickPercent, 0.05));
-      pivot.set(MathUtil.applyDeadband(operatorLeftJoystickPercent, 0.05));
-      leftIntake.set(intakeButton);
-      rightIntake.set(intakeButton);
-      // while (driver.getRawButton(5)) {
-      //   m_robotDrive.arcadeDrive(leftJoystickPercent, rightJoystickPercent);
-      // }
-      // while (driver.getRawButton(4)){
-      //   m_robotDrive.arcadeDrive(leftJoystickPercent, rightJoystickPercent);
-      // }
 
   }
 
