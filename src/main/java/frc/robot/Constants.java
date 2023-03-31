@@ -6,4 +6,5 @@ package frc.robot;
 
 
 public final class Constants {
+  public static final double MAX_VOLTAGE = 11.8;
 }
