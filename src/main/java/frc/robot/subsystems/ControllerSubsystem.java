@@ -28,8 +28,8 @@ public class ControllerSubsystem {
 
         // intake / outtake claw
         if (operator.getRawButton(6)) {  // outake
-            leftWheel = -.5;
-            rightWheel = -.5;
+            leftWheel = -.25;
+            rightWheel = -.25;
         }
         if (operator.getRawButton(5)) { // intake
             leftWheel = .5;

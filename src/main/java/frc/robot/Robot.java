@@ -73,7 +73,7 @@ public class Robot extends TimedRobot {
     CommandScheduler.getInstance().run();
     m_robotDrive.arcadeDrive(controllerSubsystem.leftJoystickPercent, controllerSubsystem.rightJoystickPercent);
     ArmSubsystem.pivotfeedforward.calculate(20, 30, 40);
-    ArmSubsystem.wristfeedforward.calculate(20, 30);
+    ArmSubsystem.extenderfeedforward.calculate(20, 30);
   }
 
   /** This function is called once each time the robot enters Disabled mode. */

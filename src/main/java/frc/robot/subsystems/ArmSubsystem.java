@@ -15,7 +15,7 @@ public class ArmSubsystem {
     public SparkMaxPIDController pivot_controller = pivot.getPIDController();
 
     public static ArmFeedforward pivotfeedforward = new ArmFeedforward(0, 1.1, 4.19,0.08);
-    public static ElevatorFeedforward wristfeedforward = new ElevatorFeedforward(0.1, 1.3, 2.3,0.1);
+    public static ElevatorFeedforward extenderfeedforward = new ElevatorFeedforward(0.1, 1.3, 2.3,0.1);
 
     public ArmSubsystem() {
 
