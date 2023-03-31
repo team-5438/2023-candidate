@@ -12,6 +12,7 @@ import frc.robot.commands.ArmExtendCommand;
 import frc.robot.commands.ClawCommand;
 import frc.robot.subsystems.*;
 
+import com.pathplanner.lib.*;
 /**
  * The VM is configured to automatically run this class, and to call the functions corresponding to
  * each mode, as described in the TimedRobot documentation. If you change the name of this class or
@@ -26,7 +27,6 @@ public class Robot extends TimedRobot {
   public DrivetrainSubsystem drivetrainSubsystem;
   public ClawCommand inOutTake;
   public ArmExtendCommand armExtendCommand;
-  DifferentialDrive m_robotDrive;
   public HandSubsystem handSubsystem;
 
   private RobotContainer m_robotContainer;
@@ -51,7 +51,6 @@ public class Robot extends TimedRobot {
     handSubsystem = new HandSubsystem();
     drivetrainSubsystem = new DrivetrainSubsystem();
     armSubsystem = new ArmSubsystem();
-    m_robotDrive = new DifferentialDrive(drivetrainSubsystem.left_front_drive, drivetrainSubsystem.right_front_drive);
   }
 
   /**
@@ -71,7 +70,7 @@ public class Robot extends TimedRobot {
     armExtendCommand = new ArmExtendCommand(armSubsystem);
     inOutTake = new ClawCommand(handSubsystem);
     CommandScheduler.getInstance().run();
-    m_robotDrive.arcadeDrive(controllerSubsystem.leftJoystickPercent, controllerSubsystem.rightJoystickPercent);
+    drivetrainSubsystem.arcadeDrive(controllerSubsystem.leftJoystickPercent, controllerSubsystem.rightJoystickPercent);
     ArmSubsystem.pivotfeedforward.calculate(20, 30, 40);
     ArmSubsystem.extenderfeedforward.calculate(20, 30);
   }
