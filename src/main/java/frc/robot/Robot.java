@@ -5,10 +5,10 @@
 package frc.robot;
 
 import edu.wpi.first.wpilibj.TimedRobot;
-import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.commands.ArmExtendCommand;
+import frc.robot.commands.AutoBalanceCommand;
 import frc.robot.commands.ClawCommand;
 import frc.robot.subsystems.*;
 
@@ -28,6 +28,9 @@ public class Robot extends TimedRobot {
   public ClawCommand inOutTake;
   public ArmExtendCommand armExtendCommand;
   public HandSubsystem handSubsystem;
+  public AutoBalanceCommand autoBalanceCommand;
+
+  public String PathFile;
 
   private RobotContainer m_robotContainer;
 
@@ -69,6 +72,7 @@ public class Robot extends TimedRobot {
     controllerSubsystem = new ControllerSubsystem();
     armExtendCommand = new ArmExtendCommand(armSubsystem);
     inOutTake = new ClawCommand(handSubsystem);
+    autoBalanceCommand = new AutoBalanceCommand(drivetrainSubsystem);
     CommandScheduler.getInstance().run();
     drivetrainSubsystem.arcadeDrive(controllerSubsystem.leftJoystickPercent, controllerSubsystem.rightJoystickPercent);
     ArmSubsystem.pivotfeedforward.calculate(20, 30, 40);
@@ -91,11 +95,24 @@ public class Robot extends TimedRobot {
     if (m_autonomousCommand != null) {
       m_autonomousCommand.schedule();
     }
+
+    PathFile = "AutoPath";
+    PathPlannerTrajectory autoPath = PathPlanner.loadPath("src/main/deploy/pathplanner/AutoPath.json", new PathConstraints(6, 6));
+    drivetrainSubsystem.followTrajectory(autoPath);
   }
 
   /** This function is called periodically during autonomous. */
   @Override
-  public void autonomousPeriodic() {}
+  public void autonomousPeriodic() 
+  {
+    // IF PATHPLANNER DOES NOT WORK, TRY
+    // drive.followTrajectory(autoPath);
+    // OR
+    // while(timer <= 3)
+    // {
+    //   drive.arcadeDrive(5, 0);
+    // }
+  }
 
   @Override
   public void teleopInit() {

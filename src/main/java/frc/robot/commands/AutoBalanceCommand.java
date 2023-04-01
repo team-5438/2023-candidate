@@ -1,7 +1,7 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.CommandBase;
-import frc.robot.*;
+import frc.robot.subsystems.DrivetrainSubsystem;
 
 public class AutoBalanceCommand extends CommandBase
 {
@@ -29,9 +29,9 @@ public class AutoBalanceCommand extends CommandBase
     {
       drive.arcadeDrive(speed, 0);
     }
-    else if (drive.getPitch <= OffBalance)
+    else if (drive.getPitch() <= OffBalance)
     {
-      drive.arcadeDrive(-speed, 0)
+      drive.arcadeDrive(-speed, 0);
     }
     else
     {

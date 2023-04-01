@@ -1,6 +1,6 @@
 package frc.robot.subsystems;
 
-import com8kauailabs.navx.frc.AHRS;
+import com.kauailabs.navx.frc.AHRS;
 
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.CANSparkMaxLowLevel.MotorType;
@@ -8,10 +8,11 @@ import com.revrobotics.RelativeEncoder;
 
 import java.util.function.Supplier;
 import java.util.function.BiConsumer;
-import java.nio.file.Path;
+import java.io.IOException;
 import java.nio.file.Paths;
 
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
+import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -34,7 +35,7 @@ import com.pathplanner.lib.commands.PPRamseteCommand;
 import com.pathplanner.lib.PathPlannerTrajectory;
 
 
-public class DrivetrainSubsystem {
+public class DrivetrainSubsystem extends SubsystemBase {
     public CANSparkMax left_back_drive = new CANSparkMax(1, MotorType.kBrushless);
     public CANSparkMax left_front_drive = new CANSparkMax(2, MotorType.kBrushless);
     public CANSparkMax right_back_drive = new CANSparkMax(3, MotorType.kBrushless);
@@ -59,13 +60,11 @@ public class DrivetrainSubsystem {
         leftEncoder = left_front_drive.getEncoder();
         rightEncoder = right_front_drive.getEncoder();
       
-        motorFeedforward = new SimpleMotorFeedforward(1, 4, 6);
+        motorFeedforward = new SimpleMotorFeedforward(Constants.ksVolts, Constants.kvVoltSecondsPerMeter, Constants.kaVoltSecondsSquaredPerMeter);
         // SimpleMotorFeedforward Inputs:
         // 1. minimum voltage motors need to move
         // 2. voltage needed to move motor at certain velocity
         // 3. voltage needed to move motor at certain acceleration
-
-        double maxAccel = motorFeedforward.maxAchievableAcceleration(Constants.MAX_VOLTAGE, 4);
         motorFeedforward.calculate(4, 6);
 
         Port USBA1 = SerialPort.Port.kUSB1;
@@ -87,7 +86,7 @@ public class DrivetrainSubsystem {
 
     public void arcadeDrive(double fwd, double rotation)
     {
-      drive.arcdeDrive(fwd, rotation);
+      drive.arcadeDrive(fwd, rotation);
     }
 
     public Supplier<Pose2d> getPose()
@@ -111,14 +110,16 @@ public class DrivetrainSubsystem {
     return navx.getPitch();
   }
 
-  public Trajectory convertPPtoWPI()
-  {}
+  public Trajectory convertPPtoWPI(String path) throws IOException
+  {
+    return TrajectoryUtil.fromPathweaverJson(Paths.get(path));
+  }
 
   BiConsumer<Double, Double> voltageConsumer = (leftVoltage, rightVoltage) -> 
   {
     double forwardSpeed = (leftVoltage + rightVoltage) / (2 * Constants.MAX_VOLTAGE);
     double rotationSpeed = (leftVoltage - rightVoltage) / (2 * Constants.MAX_VOLTAGE);
-  }
+  };
 
   public Command followTrajectory(PathPlannerTrajectory path)
   {
@@ -129,8 +130,11 @@ public class DrivetrainSubsystem {
       motorFeedforward,
       Constants.kDriveKinematics,
       WheelSpeedsSupplier(),
-      new PIDController(),
-      new PIDController(),
-    )
+      new PIDController(0.1, 0.01, 0.1),
+      new PIDController(0.1, 0.01, 0.1),
+      voltageConsumer,
+      true,
+      this
+      );
   }
 }
