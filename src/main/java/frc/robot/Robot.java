@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import java.util.Timer;
+
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -29,7 +31,9 @@ public class Robot extends TimedRobot {
   DifferentialDrive m_robotDrive;
   public HandSubsystem handSubsystem;
 
-  private RobotContainer m_robotContainer;
+  //private RobotContainer m_robotContainer;
+
+  edu.wpi.first.wpilibj.Timer time = new edu.wpi.first.wpilibj.Timer();
 
   /*
   write code to create the following motors:
@@ -52,6 +56,9 @@ public class Robot extends TimedRobot {
     drivetrainSubsystem = new DrivetrainSubsystem();
     armSubsystem = new ArmSubsystem();
     m_robotDrive = new DifferentialDrive(drivetrainSubsystem.left_front_drive, drivetrainSubsystem.right_front_drive);
+    controllerSubsystem = new ControllerSubsystem();
+    armExtendCommand = new ArmExtendCommand(armSubsystem);
+    inOutTake = new ClawCommand(handSubsystem);
   }
 
   /**
@@ -67,13 +74,9 @@ public class Robot extends TimedRobot {
     // commands, running already-scheduled commands, removing finished or interrupted commands,
     // and running subsystem periodic() methods.  This must be called from the robot's periodic
     // block in order for anything in the Command-based framework to work.
-    controllerSubsystem = new ControllerSubsystem();
-    armExtendCommand = new ArmExtendCommand(armSubsystem);
-    inOutTake = new ClawCommand(handSubsystem);
+    
     CommandScheduler.getInstance().run();
-    m_robotDrive.arcadeDrive(controllerSubsystem.leftJoystickPercent, controllerSubsystem.rightJoystickPercent);
-    ArmSubsystem.pivotfeedforward.calculate(20, 30, 40);
-    ArmSubsystem.extenderfeedforward.calculate(20, 30);
+   
   }
 
   /** This function is called once each time the robot enters Disabled mode. */
@@ -86,17 +89,48 @@ public class Robot extends TimedRobot {
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
   public void autonomousInit() {
-    m_autonomousCommand = m_robotContainer.getAutonomousCommand();
+    
 
-    // schedule the autonomous command (example)
-    if (m_autonomousCommand != null) {
-      m_autonomousCommand.schedule();
-    }
+    time.reset();
+    time.start();
   }
 
   /** This function is called periodically during autonomous. */
   @Override
-  public void autonomousPeriodic() {}
+  public void autonomousPeriodic() {
+
+    if (time.get() >= 0 && time.get() <= 2.2){
+      armSubsystem.pivot.set(-0.3);
+    }
+    
+    if (time.get() > 2.3 && time.get() <= 4.3){
+      armSubsystem.pivot.set(-0.05);
+      armSubsystem.extender.set(0.15);
+    } 
+
+    if(time.get() > 4.3 && time.get() <= 6){
+      armSubsystem.extender.set(-0.1);
+      handSubsystem.wrist.set(0.1);
+    }
+    if(time.get() > 6 && time.get() <= 8){
+      handSubsystem.wrist.set(0);
+      handSubsystem.leftIntake.set(-.25);
+      handSubsystem.rightIntake.set(-.25);
+    }
+    if(time.get() > 8 && time.get() <= 10){
+      handSubsystem.wrist.set(-0.05);
+      handSubsystem.leftIntake.set(0);
+      handSubsystem.rightIntake.set(0);
+      armSubsystem.pivot.set(0.1);
+    }
+
+    if (time.get() >= 11.9 && time.get() <= 15){
+        m_robotDrive.arcadeDrive(-0.5, 0);
+    }
+    else{
+      m_robotDrive.arcadeDrive(0, 0);
+    }
+  }
 
   @Override
   public void teleopInit() {
@@ -112,6 +146,13 @@ public class Robot extends TimedRobot {
   /** This function is called periodically during operator control. */
   @Override
   public void teleopPeriodic() {
+    controllerSubsystem = new ControllerSubsystem();
+    armExtendCommand = new ArmExtendCommand(armSubsystem);
+    inOutTake = new ClawCommand(handSubsystem);
+
+    m_robotDrive.arcadeDrive(controllerSubsystem.leftJoystickPercent, controllerSubsystem.rightJoystickPercent);
+    ArmSubsystem.pivotfeedforward.calculate(20, 30, 40);
+    ArmSubsystem.extenderfeedforward.calculate(20, 30);
 
   }
 
