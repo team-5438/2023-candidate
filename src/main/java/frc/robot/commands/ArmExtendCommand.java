@@ -1,5 +1,7 @@
 package frc.robot.commands;
 
+import com.revrobotics.CANSparkMax.ControlType;
+
 import edu.wpi.first.math.MathUtil;
 import frc.robot.subsystems.ArmSubsystem;
 import frc.robot.subsystems.ControllerSubsystem;
@@ -12,7 +14,13 @@ public class ArmExtendCommand {
         armSubsystem = armSub;
         
         controllerSubsystem = new ControllerSubsystem();
-        armSubsystem.pivot.set(MathUtil.applyDeadband(controllerSubsystem.operatorLeftJoystickPercent, 0.05));
-        armSubsystem.extender.set(MathUtil.applyDeadband(.25*controllerSubsystem.extenderChange, 0.1));
+        //if(controllerSubsystem.operatorLeftJoystickPercent < 0.2 && controllerSubsystem.operatorLeftJoystickPercent > -0.2){
+            
+          //  armSubsystem.pivot_controller.setReference(.7, ControlType.kPosition);
+        //}
+        //else{
+            armSubsystem.pivot.set(MathUtil.applyDeadband(controllerSubsystem.operatorLeftJoystickPercent, 0.05));
+            armSubsystem.extender.set(MathUtil.applyDeadband(.25*controllerSubsystem.extenderChange, 0.1));
+        //}
     }
 }

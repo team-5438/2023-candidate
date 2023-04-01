@@ -124,7 +124,7 @@ public class Robot extends TimedRobot {
       armSubsystem.pivot.set(0.1);
     }
 
-    if (time.get() >= 11.9 && time.get() <= 15){
+    if (time.get() >= 11.85  && time.get() <= 15){
         m_robotDrive.arcadeDrive(-0.5, 0);
     }
     else{

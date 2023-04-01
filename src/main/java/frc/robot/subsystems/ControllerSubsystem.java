@@ -43,6 +43,9 @@ public class ControllerSubsystem {
         if (driver.getRawButton(6)) { // spin speed divisor
             spinDiv = 0.5;
         }
+        if(driver.getRawButton(7)){
+            spinDiv = 4;
+        }
 
         // these two have to be after the button if statements
         leftJoystickPercent = -driver.getRawAxis(1) / fwdDiv;
