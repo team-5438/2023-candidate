@@ -14,5 +14,8 @@ public final class Constants {
   public static final double kvVoltSecondsPerMeter = 0.1667;
   public static final double kaVoltSecondsSquaredPerMeter = 0.0417;
 
+  public static final double kMaxSpeedMetersPerSecond = 0.75;
+  public static final double kMaxAccelerationMetersPerSecondSquared = 0.75;
+
   public static final double MAX_VOLTAGE = 11.8;
 }
