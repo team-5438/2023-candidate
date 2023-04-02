@@ -22,13 +22,5 @@ public class ArmSubsystem {
     public static ElevatorFeedforward extenderfeedforward = new ElevatorFeedforward(0.1, 1.3, 2.3,0.1);
 
     public ArmSubsystem() {
-       /*  pivot_controller.setP(0.1);
-        pivot_controller.setI(0.0001);
-        pivot_controller.setD(0.01);
-        pivot_controller.setFF(0);
-        pivot_controller.setOutputRange(-0.5,0.5);*/
-
-        
-
     }
 }
